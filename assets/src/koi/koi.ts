@@ -124,4 +124,4 @@ abstract class KoiPlugin {
 
 Koi.Import();
 
-export { Koi };
+export { };

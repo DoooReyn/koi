@@ -1,11 +1,7 @@
-/** 字典的键 */
-export type KoiKey = string | symbol;
-
-/** 字典类型 */
-export type KoiDict = { [key in KoiKey]: any };
+import { KoiDictionary, KoiKey } from "../typings/dict.typings";
 
 @Koi.Reg("Dict", true)
-export class KoiPluginDict extends KoiPlugin {
+export class KoiDict extends KoiPlugin {
   readonly name = "Koi.Plugin.Dict";
   readonly version = "0.0.1";
   readonly description = "Koi Dict Plugin";
@@ -23,7 +19,7 @@ export class KoiPluginDict extends KoiPlugin {
    * 获取字段的所有域名
    * @param dict 字典
    */
-  keys(dict: KoiDict) {
+  keys(dict: KoiDictionary) {
     return Object.keys(dict);
   }
 
@@ -31,7 +27,7 @@ export class KoiPluginDict extends KoiPlugin {
    * 获取字段的所有域值
    * @param dict 字典
    */
-  values(dict: KoiDict) {
+  values(dict: KoiDictionary) {
     return Object.values(dict);
   }
 
@@ -39,7 +35,7 @@ export class KoiPluginDict extends KoiPlugin {
    * 获取字段的所有域名和域值
    * @param dict 字典
    */
-  entries(dict: KoiDict) {
+  entries(dict: KoiDictionary) {
     return Object.entries(dict);
   }
 
@@ -48,7 +44,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param dict 字典
    * @param visit 遍历方法
    */
-  forEach(dict: KoiDict, visit: (k: KoiKey, v: any) => void) {
+  forEach(dict: KoiDictionary, visit: (k: KoiKey, v: any) => void) {
     this.keys(dict).forEach((k) => dict.hasOwnProperty(k) && visit(k, dict[k]));
   }
 
@@ -58,7 +54,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param mapping 映射方法
    * @returns
    */
-  mapping<T = any>(dict: KoiDict, mapping: (k: KoiKey, v: any) => T): KoiDict {
+  mapping<T = any>(dict: KoiDictionary, mapping: (k: KoiKey, v: any) => T): KoiDictionary {
     this.forEach(dict, (k, v) => (dict[k] = mapping(k, v)));
     return dict;
   }
@@ -68,7 +64,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param dict 字典
    * @param key 域名
    */
-  exists(dict: KoiDict, key: KoiKey) {
+  exists(dict: KoiDictionary, key: KoiKey) {
     return dict[key] !== undefined;
   }
 
@@ -77,7 +73,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param dict 字典
    * @param property 域名
    */
-  has(dict: KoiDict, property: KoiKey) {
+  has(dict: KoiDictionary, property: KoiKey) {
     return dict.hasOwnProperty(property);
   }
 
@@ -95,7 +91,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param key 键
    * @returns
    */
-  get(dict: KoiDict, key: KoiKey) {
+  get(dict: KoiDictionary, key: KoiKey) {
     if (this.exists(dict, key)) {
       return dict[key];
     }
@@ -108,7 +104,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param key 键
    * @param val 值
    */
-  set(dict: KoiDict, key: KoiKey, val: any) {
+  set(dict: KoiDictionary, key: KoiKey, val: any) {
     dict[key] = val;
   }
 
@@ -117,7 +113,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param dict 字典
    * @param key 键
    */
-  unset(dict: KoiDict, key: KoiKey) {
+  unset(dict: KoiDictionary, key: KoiKey) {
     delete dict[key];
   }
 
@@ -125,7 +121,7 @@ export class KoiPluginDict extends KoiPlugin {
    * 清空字典
    * @param dict 字典
    */
-  clear(dict: KoiDict) {
+  clear(dict: KoiDictionary) {
     for (const key in dict) {
       if (this.has(dict, key)) {
         delete dict[key];
@@ -138,7 +134,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param dict 字典
    * @returns 有损拷贝后的字典
    */
-  lossyClone(dict: KoiDict): KoiDict {
+  lossyClone(dict: KoiDictionary): KoiDictionary {
     return JSON.parse(JSON.stringify(dict));
   }
 
@@ -147,7 +143,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param dict 字典
    * @returns 深拷贝后的字典
    */
-  deepClone(dict: KoiDict): KoiDict {
+  deepClone(dict: KoiDictionary): KoiDictionary {
     if (dict === null || typeof dict !== "object") {
       return dict;
     }
@@ -159,7 +155,7 @@ export class KoiPluginDict extends KoiPlugin {
         result[i] = this.deepClone(dict[i]);
       }
     } else if (dict instanceof Object) {
-      result = {} as KoiDict;
+      result = {} as KoiDictionary;
       this.forEach(dict, (k, v) => (result[k] = this.deepClone(v)));
     }
 
@@ -171,8 +167,8 @@ export class KoiPluginDict extends KoiPlugin {
    * @param dict 字典
    * @param props 需要保留的属性
    */
-  pick(dict: KoiDict, props: KoiKey[]): KoiDict {
-    const ret: KoiDict = {};
+  pick(dict: KoiDictionary, props: KoiKey[]): KoiDictionary {
+    const ret: KoiDictionary = {};
     for (let p of props) {
       if (dict[p] != undefined) {
         ret[p] = dict[p];
@@ -187,8 +183,8 @@ export class KoiPluginDict extends KoiPlugin {
    * @param props 需要剔除的属性
    * @returns
    */
-  omit(dict: KoiDict, props: KoiKey[]): KoiDict {
-    const ret: KoiDict = {};
+  omit(dict: KoiDictionary, props: KoiKey[]): KoiDictionary {
+    const ret: KoiDictionary = {};
     this.forEach(dict, (k, v) => {
       if (props.indexOf(k) === -1) {
         ret[k] = v;
@@ -199,15 +195,15 @@ export class KoiPluginDict extends KoiPlugin {
 
   /**
    * 从原始对象上复制未定义的项到目标对象
-   * @param target 目标对象
+   * @param dst 目标对象
    * @param src 原始对象
    * @returns
    */
-  override(target: KoiDict, src: KoiDict) {
+  override(dst: KoiDictionary, src: KoiDictionary) {
     let unset = false;
     for (let key in src) {
-      if (target[key] === undefined) {
-        target[key] = src[key];
+      if (dst[key] === undefined) {
+        dst[key] = src[key];
         unset = true;
       }
     }
@@ -216,12 +212,12 @@ export class KoiPluginDict extends KoiPlugin {
 
   /**
    * 合并字典
-   * @param target 目标对象
+   * @param dst 目标对象
    * @param src 原始对象
    */
-  merge(target: KoiDict, src: KoiDict) {
+  merge(dst: KoiDictionary, src: KoiDictionary) {
     for (let key in src) {
-      target[key] = src[key];
+      dst[key] = src[key];
     }
   }
 
@@ -230,7 +226,7 @@ export class KoiPluginDict extends KoiPlugin {
    * @param dict 字典
    * @returns 冻结后的字典
    */
-  freeze(dict: KoiDict) {
+  freeze(dict: KoiDictionary) {
     return Object.freeze(dict);
   }
 }

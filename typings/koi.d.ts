@@ -1,7 +1,7 @@
 declare global {
   /** 构造类型 */
   type KoiCls<T> = new (...args: any[]) => T;
-  
+
   /** 插件基类 */
   abstract class KoiPlugin {
     /** 名称 */
