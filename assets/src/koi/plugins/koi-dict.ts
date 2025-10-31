@@ -18,7 +18,7 @@ export class KoiPluginDict extends KoiPlugin {
   onDetach() {
     console.log("Koi Dict Plugin Detached");
   }
-  
+
   /**
    * 获取字段的所有域名
    * @param dict 字典
@@ -134,23 +134,26 @@ export class KoiPluginDict extends KoiPlugin {
   }
 
   /**
-   * 数据深拷贝（只适用于纯数据对象）
+   * 有损拷贝（只适用于纯数据对象）
    * @param dict 字典
+   * @returns 有损拷贝后的字典
    */
   lossyClone(dict: KoiDict): KoiDict {
     return JSON.parse(JSON.stringify(dict));
   }
 
+  /**
+   * 深拷贝（递归处理）
+   * @param dict 字典
+   * @returns 深拷贝后的字典
+   */
   deepClone(dict: KoiDict): KoiDict {
-    if (dict == null || typeof dict !== "object") {
+    if (dict === null || typeof dict !== "object") {
       return dict;
     }
 
     let result = null;
-    if (dict instanceof Date) {
-      result = new Date();
-      result.setTime(dict.getTime());
-    } else if (Array.isArray(dict)) {
+    if (Array.isArray(dict)) {
       result = [];
       for (let i = 0, length = dict.length; i < length; i++) {
         result[i] = this.deepClone(dict[i]);
