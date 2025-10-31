@@ -1,0 +1,127 @@
+/**
+ * Koi 框架
+ */
+class Koi {
+  /**
+   * 导入 Koi 框架到指定全局环境
+   * @param env 目标环境(默认: globalThis)
+   */
+  public static Import(env?: object) {
+    const _G = env || globalThis || window || self || frames;
+    _G["Koi"] = Koi;
+    _G["KoiPlugin"] = KoiPlugin;
+    _G["koi"] = Koi.Shared;
+    this.Env = _G;
+  }
+
+  /** 全局环境 */
+  public static Env: any;
+
+  /** 实例对象 */
+  private static _instance: Koi | null;
+
+  /** 获取单例 */
+  public static get Shared(): Koi {
+    return (Koi._instance ??= new Koi());
+  }
+
+  /**
+   * 注册插件
+   * @param name 插件名称
+   * @param autoImport 是否自动导入(默认: false)
+   * @returns 插件构造
+   */
+  public static Reg<T extends KoiPlugin>(
+    name: string,
+    autoImport: boolean = false
+  ) {
+    return function (constructor: KoiCls<T>) {
+      constructor.prototype.name = name;
+      if (autoImport) {
+        koi.use(constructor);
+      }
+      return constructor;
+    };
+  }
+
+  /** 名称 */
+  public readonly name = "koi";
+  /** 描述 */
+  public readonly description = "一个致力于游戏插件化的框架";
+  /** 作者 */
+  public readonly author: string = "Koi Team | DoooReyn";
+  /** 版本 */
+  public readonly version: string = "0.0.1";
+  /** 插件构造函数 */
+  private readonly constructors: Map<string, KoiCls<KoiPlugin>> = new Map();
+  /** 插件实例 */
+  private readonly instances: Map<string, KoiPlugin> = new Map();
+
+  /**
+   * 使用插件
+   * @param arg 插件构造/名称
+   * @returns 插件实例
+   */
+  public use<P extends KoiPlugin>(arg: KoiCls<P> | string): P;
+  public use<P extends KoiPlugin>(arg: string): P | null;
+  public use<P extends KoiPlugin>(arg: KoiCls<P> | string): P | null {
+    if (typeof arg === "string") {
+      if (this.instances.has(arg)) {
+        return this.instances.get(arg)! as P;
+      }
+      return null;
+    } else {
+      const name = arg.prototype.name;
+      if (name === undefined) {
+        throw new Error("请使用装饰器 Koi.Reg 注册插件");
+      }
+      if (this.constructors.has(name)) {
+        return this.instances.get(name)! as P;
+      }
+
+      this.constructors.set(name, arg);
+
+      const inst = new arg() as P;
+      this.instances.set(name, inst);
+      inst.onAttach();
+      return inst;
+    }
+  }
+
+  /**
+   * 卸载插件
+   * @param arg 插件构造
+   */
+  public disuse(arg: KoiCls<KoiPlugin> | string) {
+    const name = typeof arg === "string" ? arg : arg.prototype.name;
+    if (name === undefined) {
+      throw new Error("请使用装饰器 Koi.Reg 注册插件");
+    }
+    if (this.constructors.delete(name)) {
+      this.instances.get(name)?.onDetach();
+      this.instances.delete(name);
+    }
+  }
+}
+
+/**
+ * 插件基类
+ */
+abstract class KoiPlugin {
+  /** 名称 */
+  abstract readonly name: string;
+  /** 版本 */
+  abstract readonly version: string;
+  /** 描述 */
+  abstract readonly description: string;
+  /** 作者 */
+  abstract readonly author: string;
+  /** 插件挂载回调 */
+  abstract onAttach(): void;
+  /** 插件卸载回调 */
+  abstract onDetach(): void;
+}
+
+Koi.Import();
+
+export { Koi };
