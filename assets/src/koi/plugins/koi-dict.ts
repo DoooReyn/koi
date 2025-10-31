@@ -224,4 +224,13 @@ export class KoiPluginDict extends KoiPlugin {
       target[key] = src[key];
     }
   }
+
+  /**
+   * 冻结字典（递归处理）
+   * @param dict 字典
+   * @returns 冻结后的字典
+   */
+  freeze(dict: KoiDict) {
+    return Object.freeze(dict);
+  }
 }
